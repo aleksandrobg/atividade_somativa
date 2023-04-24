@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [ master ]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.aleksandrobg }}
+  DOCKER_PASSWORD: ${{ secrets.Dockercluster12? }}
+  TELEGRAM_TOKEN: ${{ secrets.5951240254:AAE900G0UXRhcNT1qHKuCMwTf7Ohehc3G3U }}
+  TELEGRAM_CHAT_ID: ${{ secrets.5602373510 }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Build Docker Image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.aleksandrobg }}/app:${{ github.sha }}
+        username: ${{ secrets.aleksandrobg }}
+        password: ${{ secrets.Dockercluster12? }}
+    - name: Test Security
+      run: comando de teste de segurança
+      env:
+        DOCKER_IMAGE: ${{ secrets.aleksandrobg }}/app:${{ github.sha }}
+    - name: Send Telegram Notification
+      uses: appleboy/telegram-action@v1.3.0
+      with:
+        to: ${{ secrets.5602373510 }}
+        message: Teste de segurança bem-sucedido!
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.5951240254:AAE900G0UXRhcNT1qHKuCMwTf7Ohehc3G3U }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Deploy to Docker Hub
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.aleksandrobg }}/app:latest
+        username: ${{ secrets.aleksandrobg }}
+        password: ${{ secrets.Dockercluster12? }}
+    - name: Start Docker Container
+      run: docker run -d -p 80:80 ${{ secrets.aleksandrobg }}/app:latest
+    - name: Send Telegram Notification
+      uses: appleboy/telegram-action@v1.3.0
+      with:
+        to: ${{ secrets.5602373510 }}
+        message: Deploy bem-sucedido!
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.5951240254:AAE900G0UXRhcNT1qHKuCMwTf7Ohehc3G3U }}
